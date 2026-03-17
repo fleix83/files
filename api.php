@@ -46,8 +46,12 @@ $route = isset($_GET['route']) ? trim($_GET['route'], '/') : '';
 $segments = $route !== '' ? explode('/', $route) : [];
 $segCount = count($segments);
 
+// Route: GET /api/ping (debug)
+if ($method === 'GET' && $segCount === 1 && $segments[0] === 'ping') {
+    jsonResponse(200, ['status' => 'ok', 'route' => $route, 'method' => $method]);
+}
 // Route: POST /api/sessions
-if ($method === 'POST' && $segCount === 1 && $segments[0] === 'sessions') {
+elseif ($method === 'POST' && $segCount === 1 && $segments[0] === 'sessions') {
     handleCreateSession();
 }
 // Route: GET /api/sessions/:id

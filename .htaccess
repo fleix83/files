@@ -1,7 +1,6 @@
+Options +FollowSymLinks -Indexes
 RewriteEngine On
-
-# Increase upload limit for Apache
-# (PHP limits are set separately in php.ini or .user.ini)
+RewriteBase /files/
 
 # Route API requests to PHP backend
 RewriteRule ^api/(.*)$ api.php?route=$1 [QSA,L]
