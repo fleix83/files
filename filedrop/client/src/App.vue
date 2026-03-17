@@ -3,7 +3,6 @@
     <header class="header">
       <router-link to="/" class="logo">
         <img src="/assets/logo_wegweiser.svg" alt="GGG Wegweiser" class="logo-img" />
-        <span class="logo-files">FILES</span>
       </router-link>
     </header>
     <main class="main">
@@ -50,14 +49,6 @@ body {
   height: 96px;
   width: auto;
   margin: 20px;
-}
-
-.logo-files {
-  font-family: 'Lacquer', cursive;
-  font-size: 2.5rem;
-  color: #1a1a1a;
-  margin-left: 20px;
-  margin-top: -10px;
 }
 
 .main {
