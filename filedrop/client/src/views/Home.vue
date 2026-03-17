@@ -43,16 +43,18 @@ async function create() {
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 2.25rem;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: #ffffff;
   margin-bottom: 2rem;
-  max-width: 400px;
+  max-width: 594px;
   margin-left: auto;
   margin-right: auto;
+  font-size: 1.7rem;
+  line-height: 1.2;
 }
 
 .btn-lg {

@@ -23,7 +23,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: #f8f9fa;
-  color: #1a1a1a;
+  color: #606060;
   line-height: 1.5;
   min-height: 100vh;
 }
@@ -32,6 +32,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(317deg, #ff6565, transparent);
 }
 
 .header {
