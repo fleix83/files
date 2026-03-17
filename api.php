@@ -167,6 +167,7 @@ function handleUploadFiles($id) {
                 jsonResponse(500, ['error' => 'Upload fehlgeschlagen']);
                 return;
             }
+            chmod($dest, 0644);
         }
 
         $files = getSessionFiles($id);
