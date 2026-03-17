@@ -51,8 +51,24 @@ export function useSession() {
     });
   }
 
-  function downloadFile(id, filename) {
-    window.open(`${API_BASE}/sessions/${id}/files/${encodeURIComponent(filename)}`, '_blank');
+  async function downloadFile(id, filename) {
+    const url = `${API_BASE}/sessions/${id}/files/${encodeURIComponent(filename)}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Download fehlgeschlagen');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback to direct link
+      window.location.href = url;
+    }
   }
 
   async function deleteFile(id, filename) {
