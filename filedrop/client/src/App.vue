@@ -49,7 +49,7 @@ body {
 }
 
 .logo-img {
-  height: 28px;
+  height: 56px;
   width: auto;
 }
 
