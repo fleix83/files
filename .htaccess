@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Proxy API requests to Express backend
+RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
+
+# Serve existing files and directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# SPA fallback: send everything else to index.html
+RewriteRule ^ index.html [L]
