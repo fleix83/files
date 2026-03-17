@@ -6,6 +6,10 @@
  * via .htaccess RewriteRule passing the path as $_GET['route'].
  */
 
+// ---- Error display (temporary debug) ----
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // ---- Configuration ----
 define('DATA_DIR', __DIR__ . '/data/sessions');
 define('SESSION_TTL_HOURS', 24);
@@ -269,7 +273,7 @@ function handleQrCode($id) {
 // Helper Functions
 // ======================================================================
 
-function generateUUIDv4(): string {
+function generateUUIDv4() {
     $data = random_bytes(16);
     // Set version to 0100 (UUID v4)
     $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
@@ -286,7 +290,7 @@ function generateUUIDv4(): string {
     );
 }
 
-function sanitizeFilename(string $name): string {
+function sanitizeFilename($name) {
     // Get basename to prevent path traversal
     $name = basename($name);
     // Replace unsafe characters, keep common ones including German umlauts
@@ -296,11 +300,11 @@ function sanitizeFilename(string $name): string {
     return $name;
 }
 
-function validateSessionId(string $id): bool {
+function validateSessionId($id) {
     return (bool) preg_match(UUID_REGEX, $id);
 }
 
-function validateAndFindSession(string $id, &$sessionDir): bool {
+function validateAndFindSession($id, &$sessionDir) {
     if (!validateSessionId($id)) {
         jsonResponse(400, ['error' => 'Ungültige Session-ID']);
         return false;
@@ -313,7 +317,7 @@ function validateAndFindSession(string $id, &$sessionDir): bool {
     return true;
 }
 
-function readSessionMeta(string $id): array {
+function readSessionMeta($id) {
     $metaPath = DATA_DIR . '/' . $id . '/meta.json';
     $raw = file_get_contents($metaPath);
     if ($raw === false) {
@@ -322,13 +326,13 @@ function readSessionMeta(string $id): array {
     return json_decode($raw, true);
 }
 
-function isExpired(array $meta): bool {
+function isExpired($meta) {
     $expiresAt = new DateTime($meta['expiresAt']);
     $now = new DateTime('now', new DateTimeZone('UTC'));
     return $expiresAt < $now;
 }
 
-function getSessionFiles(string $id): array {
+function getSessionFiles($id) {
     $sessionDir = DATA_DIR . '/' . $id;
     $files = [];
 
@@ -355,14 +359,14 @@ function getSessionFiles(string $id): array {
     return $files;
 }
 
-function jsonResponse(int $statusCode, $data): void {
+function jsonResponse($statusCode, $data) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-function normalizeFilesArray(array $files): array {
+function normalizeFilesArray($files) {
     // If single file upload, $_FILES['files']['name'] is a string
     if (!is_array($files['name'])) {
         return [$files];
@@ -383,7 +387,7 @@ function normalizeFilesArray(array $files): array {
     return $result;
 }
 
-function uploadErrorMessage(int $error): string {
+function uploadErrorMessage($error) {
     switch ($error) {
         case UPLOAD_ERR_INI_SIZE:
         case UPLOAD_ERR_FORM_SIZE:
@@ -399,7 +403,7 @@ function uploadErrorMessage(int $error): string {
 
 // ---- Cleanup ----
 
-function throttledCleanup(): void {
+function throttledCleanup() {
     $stampFile = CLEANUP_STAMP_FILE;
     $now = time();
 
@@ -422,7 +426,7 @@ function throttledCleanup(): void {
     cleanExpiredSessions();
 }
 
-function cleanExpiredSessions(): void {
+function cleanExpiredSessions() {
     $sessionsDir = DATA_DIR;
     if (!is_dir($sessionsDir)) return;
 
@@ -458,7 +462,7 @@ function cleanExpiredSessions(): void {
     }
 }
 
-function deleteDirectory(string $dir): void {
+function deleteDirectory($dir) {
     if (!is_dir($dir)) return;
 
     $entries = scandir($dir);
