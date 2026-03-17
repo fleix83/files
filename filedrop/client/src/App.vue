@@ -3,7 +3,7 @@
     <header class="header">
       <router-link to="/" class="logo">
         <img src="/assets/logo_wegweiser.svg" alt="GGG Wegweiser" class="logo-img" />
-        <span class="logo-files">Files</span>
+        <span class="logo-files">FILES</span>
       </router-link>
     </header>
     <main class="main">
@@ -41,8 +41,8 @@ body {
 
 .logo {
   display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
   text-decoration: none;
 }
 
@@ -54,8 +54,10 @@ body {
 
 .logo-files {
   font-family: 'Lacquer', cursive;
-  font-size: 1.75rem;
+  font-size: 2.5rem;
   color: #1a1a1a;
+  margin-left: 20px;
+  margin-top: -10px;
 }
 
 .main {
