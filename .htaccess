@@ -1,9 +1,8 @@
-Options +FollowSymLinks -Indexes
 RewriteEngine On
 RewriteBase /files/
 
 # Route API requests to PHP backend
-RewriteRule ^api/(.*)$ api.php?route=$1 [QSA,L]
+RewriteRule ^api/(.*)$ api.php?route=$1 [B,QSA,L]
 
 # Serve existing files and directories directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
