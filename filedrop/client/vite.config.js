@@ -6,7 +6,7 @@ export default defineConfig({
   base: '/files/',
   server: {
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/files/api': 'http://localhost:80',
     },
   },
   build: {

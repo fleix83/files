@@ -78,6 +78,14 @@ elseif ($method === 'DELETE' && $segCount === 4 && $segments[0] === 'sessions' &
 elseif ($method === 'GET' && $segCount === 3 && $segments[0] === 'sessions' && $segments[2] === 'qr') {
     handleQrCode($segments[1]);
 }
+// Route: GET /api/sessions/:id/chat
+elseif ($method === 'GET' && $segCount === 3 && $segments[0] === 'sessions' && $segments[2] === 'chat') {
+    handleGetChat($segments[1]);
+}
+// Route: POST /api/sessions/:id/chat
+elseif ($method === 'POST' && $segCount === 3 && $segments[0] === 'sessions' && $segments[2] === 'chat') {
+    handlePostChat($segments[1]);
+}
 else {
     jsonResponse(404, ['error' => 'Route nicht gefunden']);
 }
@@ -165,7 +173,7 @@ function handleUploadFiles($id) {
             }
 
             $safeName = sanitizeFilename($file['name']);
-            if ($safeName === '' || $safeName === 'meta.json') {
+            if ($safeName === '' || $safeName === 'meta.json' || $safeName === 'chat.json') {
                 jsonResponse(400, ['error' => 'Ungültiger Dateiname']);
                 return;
             }
@@ -269,6 +277,67 @@ function handleQrCode($id) {
     exit;
 }
 
+function handleGetChat($id) {
+    if (!validateAndFindSession($id, $sessionDir)) return;
+
+    try {
+        $meta = readSessionMeta($id);
+        if (isExpired($meta)) {
+            jsonResponse(410, ['error' => 'Session abgelaufen']);
+            return;
+        }
+        $messages = readChatMessages($sessionDir);
+        jsonResponse(200, $messages);
+    } catch (Exception $e) {
+        error_log('Get chat error: ' . $e->getMessage());
+        jsonResponse(500, ['error' => 'Chat konnte nicht geladen werden']);
+    }
+}
+
+function handlePostChat($id) {
+    if (!validateAndFindSession($id, $sessionDir)) return;
+
+    try {
+        $meta = readSessionMeta($id);
+        if (isExpired($meta)) {
+            jsonResponse(410, ['error' => 'Session abgelaufen']);
+            return;
+        }
+
+        $body = json_decode(file_get_contents('php://input'), true);
+        if (!$body || !isset($body['text']) || trim($body['text']) === '') {
+            jsonResponse(400, ['error' => 'Nachricht darf nicht leer sein']);
+            return;
+        }
+
+        $text = mb_substr(trim($body['text']), 0, 500);
+        $name = isset($body['name']) && trim($body['name']) !== '' ? mb_substr(trim($body['name']), 0, 50) : 'Anon';
+
+        $messages = readChatMessages($sessionDir);
+        $messages[] = [
+            'id' => generateUUIDv4(),
+            'name' => $name,
+            'text' => $text,
+            'time' => (new DateTime('now', new DateTimeZone('UTC')))->format('Y-m-d\TH:i:s.v\Z'),
+        ];
+
+        file_put_contents($sessionDir . '/chat.json', json_encode($messages, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        jsonResponse(200, $messages);
+    } catch (Exception $e) {
+        error_log('Post chat error: ' . $e->getMessage());
+        jsonResponse(500, ['error' => 'Nachricht konnte nicht gesendet werden']);
+    }
+}
+
+function readChatMessages($sessionDir) {
+    $chatPath = $sessionDir . '/chat.json';
+    if (!file_exists($chatPath)) return [];
+    $raw = file_get_contents($chatPath);
+    if ($raw === false) return [];
+    $messages = json_decode($raw, true);
+    return is_array($messages) ? $messages : [];
+}
+
 // ======================================================================
 // Helper Functions
 // ======================================================================
@@ -340,7 +409,7 @@ function getSessionFiles($id) {
     if ($entries === false) return [];
 
     foreach ($entries as $entry) {
-        if ($entry === '.' || $entry === '..' || $entry === 'meta.json') continue;
+        if ($entry === '.' || $entry === '..' || $entry === 'meta.json' || $entry === 'chat.json') continue;
         $filePath = $sessionDir . '/' . $entry;
         if (is_file($filePath)) {
             $files[] = [

@@ -83,5 +83,21 @@ export function useSession() {
     return `${API_BASE}/sessions/${id}/qr`;
   }
 
-  return { createSession, getSession, uploadFiles, downloadFile, deleteFile, getQrCodeUrl };
+  async function getChat(id) {
+    const res = await fetch(`${API_BASE}/sessions/${id}/chat`);
+    if (!res.ok) return [];
+    return res.json();
+  }
+
+  async function sendChat(id, name, text) {
+    const res = await fetch(`${API_BASE}/sessions/${id}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, text }),
+    });
+    if (!res.ok) throw new Error('Nachricht konnte nicht gesendet werden');
+    return res.json();
+  }
+
+  return { createSession, getSession, uploadFiles, downloadFile, deleteFile, getQrCodeUrl, getChat, sendChat };
 }

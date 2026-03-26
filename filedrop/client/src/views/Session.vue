@@ -19,6 +19,7 @@
     </div>
     <FileUpload :session-id="session.id" @uploaded="refreshFiles" />
     <FileList :files="files" :session-id="session.id" @deleted="refreshFiles" />
+    <SessionChat :session-id="session.id" :messages="chatMessages" @sent="refreshChat" />
   </div>
 </template>
 
@@ -29,12 +30,14 @@ import { useSession } from '../composables/useSession.js';
 import QrCode from '../components/QrCode.vue';
 import FileUpload from '../components/FileUpload.vue';
 import FileList from '../components/FileList.vue';
+import SessionChat from '../components/SessionChat.vue';
 
 const route = useRoute();
-const { getSession } = useSession();
+const { getSession, getChat } = useSession();
 
 const session = ref(null);
 const files = ref([]);
+const chatMessages = ref([]);
 const loading = ref(true);
 const error = ref('');
 let pollInterval = null;
@@ -59,10 +62,23 @@ async function refreshFiles() {
   }
 }
 
+async function refreshChat() {
+  try {
+    chatMessages.value = await getChat(route.params.sessionId);
+  } catch {
+    // ignore polling errors
+  }
+}
+
+async function pollAll() {
+  await Promise.all([refreshFiles(), refreshChat()]);
+}
+
 onMounted(async () => {
   await loadSession();
+  await refreshChat();
   loading.value = false;
-  pollInterval = setInterval(refreshFiles, 5000);
+  pollInterval = setInterval(pollAll, 5000);
 });
 
 onUnmounted(() => {
