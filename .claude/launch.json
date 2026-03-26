@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Vite Dev (Client)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173,
+      "cwd": "filedrop/client"
+    },
+    {
+      "name": "Express API (Server)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--watch", "index.js"],
+      "port": 3000,
+      "cwd": "filedrop/server"
+    }
+  ]
+}

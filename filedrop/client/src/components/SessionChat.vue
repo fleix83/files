@@ -4,9 +4,12 @@
     <div class="chat-messages" ref="messagesEl">
       <p v-if="!messages.length" class="empty">Noch keine Nachrichten.</p>
       <div v-for="msg in messages" :key="msg.id" class="message">
-        <span class="message-name">{{ msg.name }}</span>
-        <span class="message-time">{{ formatTime(msg.time) }}</span>
-        <div class="message-text">{{ msg.text }}</div>
+        <span class="blob" :style="{ background: colorFor(msg.name) }">{{ initial(msg.name) }}</span>
+        <div class="message-body">
+          <span class="message-name" :style="{ color: colorFor(msg.name) }">{{ msg.name }}</span>
+          <span class="message-time">{{ formatTime(msg.time) }}</span>
+          <div class="message-text">{{ msg.text }}</div>
+        </div>
       </div>
     </div>
     <form class="chat-form" @submit.prevent="send">
@@ -41,6 +44,7 @@ const messagesEl = ref(null);
 const name = ref(localStorage.getItem('chat-name') || '');
 const text = ref('');
 
+
 watch(() => name.value, (val) => {
   localStorage.setItem('chat-name', val);
 });
@@ -69,6 +73,27 @@ async function send() {
   } catch {
     // ignore
   }
+}
+
+const BLOB_COLORS = [
+  '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#1abc9c',
+  '#3498db', '#9b59b6', '#e84393', '#00b894', '#6c5ce7',
+];
+
+function hashName(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) {
+    h = name.charCodeAt(i) + ((h << 5) - h);
+  }
+  return Math.abs(h);
+}
+
+function colorFor(name) {
+  return BLOB_COLORS[hashName(name) % BLOB_COLORS.length];
+}
+
+function initial(name) {
+  return (name || '?').charAt(0).toUpperCase();
 }
 
 function formatTime(iso) {
@@ -106,11 +131,32 @@ function formatTime(iso) {
 }
 
 .message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 .message:last-child {
   margin-bottom: 0;
+}
+
+.blob {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  margin-top: 1px;
+}
+
+.message-body {
+  min-width: 0;
 }
 
 .message-name {
