@@ -27,6 +27,7 @@ async function create() {
   error.value = '';
   try {
     const session = await createSession();
+    localStorage.setItem('chat-name', 'GGG');
     router.push(`/s/${session.id}`);
   } catch {
     error.value = 'Session konnte nicht erstellt werden. Bitte versuche es erneut.';
