@@ -1,6 +1,9 @@
 <template>
   <div class="chat">
-    <h3>Chat</h3>
+    <div class="chat-header">
+      <h3>Chat</h3>
+      <a v-if="messages.length" href="#" class="export-link" @click.prevent="exportChat">Chat speichern</a>
+    </div>
     <div class="chat-messages" ref="messagesEl">
       <p v-if="!messages.length" class="empty">Noch keine Nachrichten.</p>
       <div v-for="msg in messages" :key="msg.id" class="message">
@@ -10,6 +13,10 @@
           <span class="message-time">{{ formatTime(msg.time) }}</span>
           <div class="message-text">{{ msg.text }}</div>
         </div>
+        <button class="copy-btn" @click="copyMessage(msg)" :title="'Nachricht kopieren'">
+          <svg v-if="copiedId !== msg.id" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
       </div>
     </div>
     <form class="chat-form" @submit.prevent="send">
@@ -43,6 +50,7 @@ const { sendChat } = useSession();
 const messagesEl = ref(null);
 const name = ref(localStorage.getItem('chat-name') || '');
 const text = ref('');
+const copiedId = ref(null);
 
 
 watch(() => name.value, (val) => {
@@ -96,6 +104,30 @@ function initial(name) {
   return (name || '?').charAt(0).toUpperCase();
 }
 
+async function copyMessage(msg) {
+  try {
+    await navigator.clipboard.writeText(msg.text);
+    copiedId.value = msg.id;
+    setTimeout(() => { copiedId.value = null; }, 1500);
+  } catch {
+    // fallback ignored
+  }
+}
+
+function exportChat() {
+  const lines = props.messages.map((msg) => {
+    const time = formatTime(msg.time);
+    return `[${time}] ${msg.name}: ${msg.text}`;
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `chat-${props.sessionId}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function formatTime(iso) {
   const d = new Date(iso);
   return d.toLocaleString('de-CH', {
@@ -110,9 +142,26 @@ function formatTime(iso) {
   margin-top: 1.5rem;
 }
 
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
 .chat h3 {
   font-size: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
+}
+
+.export-link {
+  font-size: 0.8125rem;
+  color: #3498db;
+  text-decoration: none;
+}
+
+.export-link:hover {
+  text-decoration: underline;
 }
 
 .empty {
@@ -155,8 +204,27 @@ function formatTime(iso) {
   margin-top: 1px;
 }
 
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d1d5db;
+  padding: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.copy-btn:hover {
+  color: #6b7280;
+}
+
 .message-body {
   min-width: 0;
+  flex: 1;
 }
 
 .message-name {
